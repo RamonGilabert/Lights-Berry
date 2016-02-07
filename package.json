@@ -1,0 +1,14 @@
+{
+  "repository": "RamonGilabert/Lights-Berry",
+  "version": "0.0.1",
+  "author": "Ramon Gilabert",
+  "name": "lights-berry",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "~1.14.2",
+    "bookshelf": "0.9.1",
+    "express": "~4.13.3",
+    "knex": "0.9.0",
+    "pg": "4.4.3"
+  }
+}

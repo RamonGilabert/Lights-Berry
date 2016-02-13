@@ -2,7 +2,9 @@
 
 module.exports = function(bookshelf) {
 
-  return Light = bookshelf.Model.extend({
+  var Light = bookshelf.Model.extend({
     tableName: 'lights'
   });
+
+  return Light;
 };

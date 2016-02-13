@@ -2,7 +2,9 @@
 
 module.exports = function(bookshelf) {
 
-  return Controller = bookshelf.Model.extend({
+  var Controller = bookshelf.Model.extend({
     tableName: 'controller'
   });
+
+  return Controller;
 };

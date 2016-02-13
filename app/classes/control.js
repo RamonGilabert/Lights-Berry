@@ -13,6 +13,7 @@ module.exports = function(bookshelf, Light, Controller) {
         new Controller()
         .save(controller)
         .then(function(controller) {
+          console.log('First');
           return fetchLights(controller.id);
         });
       });

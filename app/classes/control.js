@@ -8,7 +8,14 @@ module.exports = function(bookshelf, Light, Controller) {
   .fetchAll()
   .then(function(controllers) {
     if (controllers.length === 0) {
-      Requester.postController();
+      Requester.postController()
+      .then(function(controller) {
+        new Controller()
+        .save(controller)
+        .then(function(controller) {
+          return fetchLights(controller.id);
+        });
+      });
     } else {
       return fetchLights(controllers.models[0].id);
     }
@@ -19,8 +26,16 @@ module.exports = function(bookshelf, Light, Controller) {
     .fetchAll()
     .then(function(lights) {
       if (lights.length === 0) {
-        // TODO: Post to the database and return true.
-        console.log("0 lights.");
+        Requester.postLight(controllerID)
+        .then(function(light) {
+          console.log(light);
+          new Light()
+          .save(light)
+          .then(function(light) {
+            console.log(light.id);
+            return true;
+          });
+        });
       } else {
         return false;
       }

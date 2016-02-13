@@ -2,18 +2,19 @@
 
 module.exports = function(bookshelf, Light, Controller) {
 
+  var Requester = require('./requester.js');
+
   new Controller()
   .fetchAll()
   .then(function(controllers) {
     if (controllers.length === 0) {
-      // TODO: Post to the database and return the method from fetchLights.
+      Requester.postController();
     } else {
       return fetchLights(controllers.models[0].id);
     }
   });
 
   function fetchLights(controllerID) {
-    console.log(controllerID);
     new Light( { 'controller_id': controllerID } )
     .fetchAll()
     .then(function(lights) {

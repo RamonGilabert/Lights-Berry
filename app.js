@@ -1,5 +1,9 @@
 var express = require('express');
 var app = express();
+var databaseAddress = process.env.DATABASE_URL || 'postgres://localhost';
+var bookshelf = require('/app/classes/database.js')(databaseAddress);
+
+console.log(bookshelf);
 
 app.set('port', 6000);
 app.set('views', __dirname + '/views');

@@ -1,45 +1,56 @@
 /* Control first time */
 
-module.exports = function(bookshelf, Light, Controller) {
+var Requester = require('./requester.js');
 
-  var Requester = require('./requester.js');
+module.exports = {
 
-  new Controller()
-  .fetchAll()
-  .then(function(controllers) {
-    if (controllers.length === 0) {
-      Requester.postController()
-      .then(function(controller) {
-        new Controller()
-        .save(controller)
-        .then(function(controller) {
-          console.log('First');
-          return fetchLights(controller.id);
-        });
-      });
-    } else {
-      return fetchLights(controllers.models[0].id);
-    }
-  });
+  Requester: Requester,
 
-  function fetchLights(controllerID) {
-    new Light( { 'controller_id': controllerID } )
-    .fetchAll()
-    .then(function(lights) {
-      if (lights.length === 0) {
-        Requester.postLight(controllerID)
-        .then(function(light) {
-          console.log(light);
-          new Light()
-          .save(light)
-          .then(function(light) {
-            console.log(light.id);
-            return true;
+  checkFlow: function(bookshelf, Light, Controller) {
+    return new Promise(function(resolve, reject) {
+      new Controller()
+      .fetchAll()
+      .then(function(controllers) {
+        if (controllers.length === 0) {
+          Requester.postController()
+          .then(function(controller) {
+            new Controller()
+            .save(controller)
+            .then(function(controller) {
+              module.exports.checkLights(controller.id, bookshelf, Light)
+              .then(function(result) {
+                resolve(result);
+              });
+            });
           });
-        });
-      } else {
-        return false;
-      }
+        } else {
+          module.exports.checkLights(controllers.models[0].id, bookshelf, Light)
+          .then(function(result) {
+            resolve(result);
+          });
+        }
+      });
     });
-  };
+  },
+
+  checkLights: function(controllerID, bookshelf, Light) {
+    return new Promise(function(resolve, reject) {
+      new Light( { 'controller_id': controllerID } )
+      .fetchAll()
+      .then(function(lights) {
+        if (lights.length === 0) {
+          Requester.postLight(controllerID)
+          .then(function(light) {
+            new Light()
+            .save(light)
+            .then(function(light) {
+              resolve(true);
+            });
+          });
+        } else {
+          resolve(false);
+        }
+      });
+    });
+  }
 };

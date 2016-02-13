@@ -13,9 +13,10 @@ module.exports = {
       'admin': 'true'
     }
 
-    return this.postHelper('/controllers', headers).then(function(body) {
+    var body = {}
+
+    return this.postHelper('/controllers', headers, body).then(function(body) {
       return new Promise(function(resolve, reject) {
-        var body = JSON.parse(body);
         resolve(body.controller);
       });
     });

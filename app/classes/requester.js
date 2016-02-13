@@ -1,6 +1,6 @@
 /* Request manager */
 
-var request = require("request");
+var request = require('request');
 var routeAPI = 'https://lights-backend.herokuapp.com';
 
 module.exports = {
@@ -10,13 +10,13 @@ module.exports = {
 
   postController: function() {
     this.postHelper('/controllers').then(function(body) {
-      console.log(body);
+      console.log(body.controller);
     });
   },
 
   postLight: function() {
     this.postHelper('/lights').then(function(body) {
-      console.log(body);
+      console.log(body.light);
     });
   },
 
@@ -29,7 +29,7 @@ module.exports = {
           'admin': 'true'
         }
       }, function(error, response, body) {
-        resolve(body);
+        resolve(JSON.parse(body));
       });
     });
   }

@@ -4,6 +4,7 @@
   "author": "Ramon Gilabert",
   "name": "lights-berry",
   "main": "app.js",
+  "license": "BSD-3-Clause",
   "dependencies": {
     "body-parser": "~1.14.2",
     "bookshelf": "0.9.1",

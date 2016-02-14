@@ -2,8 +2,7 @@ var express = require('express');
 var app = express();
 var databaseAddress = process.env.DATABASE_URL || 'postgres://localhost';
 var bookshelf = require('./app/classes/database.js')(databaseAddress);
-var io = require('socket.io-client');
-var socket = io.connect('https://lights-backend.herokuapp.com', { reconnect: true });
+require('./app/classes/socket.js');
 
 var Controller = require('./app/models/controller.js')(bookshelf);
 var Light = require('./app/models/light.js')(bookshelf);
@@ -22,8 +21,4 @@ app.listen(app.get('port'), function() {
   // .then(function(result) {
   //   console.log(result)
   // });
-});
-
-socket.on('connect', function(socket) {
-  console.log('Values should be set to the Raspberry Pi now.');
 });

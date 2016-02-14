@@ -4,8 +4,11 @@ module.exports = function(directory) {
 
   var database = {
     client: 'pg',
-    connection: directory,
-    searchPath: 'knex, public'
+    connection: {
+      user     : 'postgres',
+      password : 'postgres',
+      database : 'postgres'
+    }
   };
 
   var knex = require('knex')(database);

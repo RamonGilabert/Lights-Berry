@@ -3,15 +3,15 @@
 module.exports = function(controllerID, bookshelf) {
 
   var io = require('socket.io-client');
-  var socket = io.connect('http://localhost:5000', { reconnect: true });
-  var Light = require('../models/light.js');
+  var socket = io.connect('https://lights-backend.herokuapp.com', { reconnect: true });
+  var Light = require('../models/light.js')(bookshelf);
 
   socket.on('connect', function() {
     console.log('A light connected to the central server.');
 
     socket.emit('ios-light', {
-      id: 2,
-      controllerID: 2,
+      id: 3,
+      controllerID: 4,
       status: false,
       intensity: 1,
       red: 1,
@@ -21,22 +21,21 @@ module.exports = function(controllerID, bookshelf) {
   });
 
   socket.on('light-' + controllerID, function(light) {
-    new Light({ 'id' : light.id })
-      .fetch()
-      .then(function(bookshelfLight) {
-        if (parseInt(bookshelfLight.attributes['controller_id']) === parseInt(controllerID)) {
-          bookshelfLight.save({
-            'updated' : new Date(),
-            'status' : light.status,
-            'intensity' : light.intensity,
-            'red' : light.red,
-            'blue' : light.blue,
-            'green' : light.green
-          }, { patch : true })
+    new Light()
+    .fetch({ 'id' : light.id })
+    .then(function(bookshelfLight) {
+      if (parseInt(bookshelfLight.attributes['controller_id']) === parseInt(controllerID)) {
+        bookshelfLight.save({
+          'updated' : new Date(),
+          'status' : light.light.status,
+          'intensity' : light.light.intensity,
+          'red' : light.light.red,
+          'blue' : light.light.blue,
+          'green' : light.light.green
+        }, { patch : true })
 
-          // TODO: Change values in the RBPi.
-        }
-      });
+        // TODO: Change values in the RBPi.
+      }
     });
   });
 };

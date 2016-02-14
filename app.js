@@ -17,6 +17,6 @@ app.listen(app.get('port'), function() {
 
   control.checkFlow(bookshelf, Light, Controller)
   .then(function(controllerID) {
-    require('./app/classes/socket.js')(controllerID);
+    require('./app/classes/socket.js')(controllerID, bookshelf);
   });
 });

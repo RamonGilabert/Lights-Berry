@@ -2,7 +2,6 @@ var express = require('express');
 var app = express();
 var databaseAddress = process.env.DATABASE_URL || 'postgres://localhost';
 var bookshelf = require('./app/classes/database.js')(databaseAddress);
-require('./app/classes/socket.js');
 
 var Controller = require('./app/models/controller.js')(bookshelf);
 var Light = require('./app/models/light.js')(bookshelf);
@@ -16,9 +15,8 @@ app.set('view engine', 'ejs');
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 
-  // TODO: Uncomment those lines when working on that.
-  // control.checkFlow(bookshelf, Light, Controller)
-  // .then(function(result) {
-  //   console.log(result)
-  // });
+  control.checkFlow(bookshelf, Light, Controller)
+  .then(function(controllerID) {
+    require('./app/classes/socket.js')(controllerID);
+  });
 });

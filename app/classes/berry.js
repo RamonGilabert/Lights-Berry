@@ -16,12 +16,12 @@ for (pin in pins) {
 var direction = 1;
 var data = 0;
 var pulse = setInterval(function() {
-        rpio.pwmSetData(pin, data);
-        if (data === 0) {
-          direction = 1;
-        } else if (data === max) {
-          direction = -1;
-        }
+  rpio.pwmSetData(pin, data);
+  if (data === 0) {
+    direction = 1;
+  } else if (data === max) {
+    direction = -1;
+  }
 
-        data += direction;
+  data += direction;
 }, interval, data, direction);

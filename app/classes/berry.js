@@ -3,7 +3,7 @@
 module.exports = function() {
   var rpio = require('rpio');
 
-  var pins = [17, 27, 22];
+  var pins = [32, 33, 12];
   var range = 1024;
   var clockDivider = 8;
   var interval = 5;
@@ -17,8 +17,10 @@ module.exports = function() {
   var direction = 1;
   var data = 0;
   var pulse = setInterval(function() {
-    console.log('Sup');
-    rpio.pwmSetData(pin, data);
+    for (pin in pins) {
+      rpio.pwmSetData(pin, data);
+    }
+
     if (data === 0) {
       direction = 1;
     } else if (data === max) {
@@ -26,5 +28,5 @@ module.exports = function() {
     }
 
     data += direction;
-  }, interval, data, direction);
+  }, interval);
 };

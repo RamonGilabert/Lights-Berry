@@ -10,13 +10,14 @@ module.exports = function(controllerID, bookshelf) {
     console.log('A light connected to the central server.');
 
     socket.emit('ios-light', {
-      id: 3,
-      controllerID: 4,
-      status: false,
+      id: 5,
+      controllerID: 5,
+      status: true,
       intensity: 1,
       red: 1,
       green: 1,
-      blue: 1
+      blue: 1,
+      token: 'jlk0aefk8d0tpag820prosop9b7f'
     });
   });
 

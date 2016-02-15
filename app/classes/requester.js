@@ -10,12 +10,11 @@ module.exports = {
 
   postController: function() {
     var headers = {
+      'content-type': 'application/json',
       'admin': 'true'
     }
 
-    var body = {}
-
-    return this.postHelper('/controllers', headers, body).then(function(body) {
+    return this.postHelper('/controllers', headers).then(function(body) {
       return new Promise(function(resolve, reject) {
         resolve(body.controller);
       });
@@ -24,21 +23,14 @@ module.exports = {
 
   postLight: function(controllerID) {
     var headers = {
+      'content-type': 'application/json',
       'admin': 'true',
       'controller_id' : controllerID
     }
 
-    var body = {
-      "status": false,
-      "intensity": 1,
-      "red": 1,
-      "green": 1,
-      "blue": 1
-    }
-
-    return this.postHelper('/lights', headers, body).then(function(body) {
+    return this.postHelper('/lights', headers).then(function(body) {
       return new Promise(function(resolve, reject) {
-        resolve(body.light);
+        resolve(JSON.parse(body).light);
       });
     });
   },
@@ -48,8 +40,7 @@ module.exports = {
       request({
         uri: routeAPI + route,
         method: 'POST',
-        headers: headers,
-        json: body
+        headers: headers
       }, function(error, response, body) {
         resolve(body);
       });

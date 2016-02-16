@@ -18,15 +18,15 @@ module.exports = {
             .save(controller)
             .then(function(controller) {
               module.exports.checkLights(controller.id, bookshelf, Light)
-              .then(function() {
-                resolve(controller.id);
+              .then(function(light) {
+                resolve(controller.id, light);
               });
             });
           });
         } else {
           module.exports.checkLights(controllers.models[0].id, bookshelf, Light)
-          .then(function() {
-            resolve(controllers.models[0].id);
+          .then(function(light) {
+            resolve(controllers.models[0].id, light);
           });
         }
       });
@@ -44,11 +44,11 @@ module.exports = {
             new Light()
             .save(light)
             .then(function(light) {
-              resolve();
+              resolve(light);
             });
           });
         } else {
-          resolve();
+          resolve(light);
         }
       });
     });

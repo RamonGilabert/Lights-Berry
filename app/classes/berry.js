@@ -10,15 +10,19 @@ module.exports = function(light) {
   var range = 255;
   var clockDivider = 8;
 
-  pins.forEach(function(pin) {
-    rpio.open(pin, rpio.PWM);
-    rpio.pwmSetClockDivider(clockDivider);
-    rpio.pwmSetRange(pin, range);
-  });
+  if (light.status) {
+    pins.forEach(function(pin) {
+      rpio.open(pin, rpio.PWM);
+      rpio.pwmSetClockDivider(clockDivider);
+      rpio.pwmSetRange(pin, range);
+    });
 
-  rpio.pwmSetData(redPin, light.red * light.intensity * 255);
-  rpioGreen.pwmSetData(greenPin, light.green * light.intensity * 255);
-  rpioTwo.pwmSetData(bluePin, light.blue * light.intensity * 255);
+    rpio.pwmSetData(redPin, light.red * light.intensity * 255);
+    rpioGreen.pwmSetData(greenPin, light.green * light.intensity * 255);
+    rpioTwo.pwmSetData(bluePin, light.blue * light.intensity * 255);
+  } else {
+    pins.forEach(function(pin) { rpio.close(pin); });
+  }
 
   process.on('SIGINT', function() {
     pins.forEach(function(pin) { rpio.close(pin); });

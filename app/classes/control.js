@@ -1,6 +1,6 @@
 /* Control first time */
 
-var Requester = require('./requester.js');
+var Requester = require('../classes/requester.js');
 
 module.exports = {
 
@@ -19,14 +19,14 @@ module.exports = {
             .then(function(controller) {
               module.exports.checkLights(controller.id, bookshelf, Light)
               .then(function(light) {
-                resolve(controller.id, light);
+                resolve(light);
               });
             });
           });
         } else {
           module.exports.checkLights(controllers.models[0].id, bookshelf, Light)
           .then(function(light) {
-            resolve(controllers.models[0].id, light);
+            resolve(light);
           });
         }
       });
@@ -44,11 +44,11 @@ module.exports = {
             new Light()
             .save(light)
             .then(function(light) {
-              resolve(light);
+              resolve(light.attributes);
             });
           });
         } else {
-          resolve(light);
+          resolve(lights.models[0].attributes);
         }
       });
     });

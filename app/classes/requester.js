@@ -16,7 +16,7 @@ module.exports = {
 
     return this.postHelper('/controllers', headers).then(function(body) {
       return new Promise(function(resolve, reject) {
-        resolve(body.controller);
+        resolve(JSON.parse(body).controller);
       });
     });
   },

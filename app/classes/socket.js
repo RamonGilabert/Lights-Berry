@@ -5,19 +5,20 @@ module.exports = function(controllerID, bookshelf) {
   var io = require('socket.io-client');
   var socket = io.connect('https://lights-backend.herokuapp.com', { reconnect: true });
   var Light = require('../models/light.js')(bookshelf);
+  var berry = require('../classes/berry.js');
 
   socket.on('connect', function() {
     console.log('A light connected to the central server.');
 
     socket.emit('ios-light', {
-      id: 5,
-      controllerID: 5,
+      id: 1,
+      controllerID: 1,
       status: true,
       intensity: 1,
       red: 1,
       green: 1,
       blue: 1,
-      token: 'jlk0aefk8d0tpag820prosop9b7f'
+      token: 'td832d3q6r5o7lc0ajeqg5b8bb0e1q7f'
     });
   });
 
@@ -34,8 +35,7 @@ module.exports = function(controllerID, bookshelf) {
           'blue' : light.light.blue,
           'green' : light.light.green
         }, { patch : true })
-
-        // TODO: Change values in the RBPi.
+        berry.light(light.light);
       }
     });
   });

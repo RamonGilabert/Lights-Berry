@@ -3,23 +3,30 @@
 module.exports = function() {
   var rpio = require('rpio');
 
-  var pins = [12, 32, 33];
-  var range = 1024;
-  var max = 128;
+  var redPin = 12;
+  var greenPin = 32;
+  var bluePin = 33;
+  var pins = [redPin, greenPin, bluePin];
+  var range = 255;
   var clockDivider = 8;
   var interval = 1000;
 
-  for (pin in pins) {
-    rpio.open(pins[pin], rpio.PWM);
+  pins.forEach(function(pin) {
+    rpio.open(pin, rpio.PWM);
     rpio.pwmSetClockDivider(clockDivider);
-    rpio.pwmSetRange(pins[pin], range);
-  }
+    rpio.pwmSetRange(pin, range);
+  });
 
-  var direction = 1;
-  var data = 0;
-  var pulse = setInterval(function() {
-    for (pin in pins) {
-      rpio.pwmSetData(pins[pin], 128);
-    }
-  }, interval, data, direction);
+  //rpio.write(12, rpio.HIGH);
+
+  rpio.pwmSetData(redPin, range);
+  rpio.pwmSetData(greenPin, range);
+  rpio.pwmSetData(bluePin, range);
+
+  process.stdin.resume();
+
+  process.on('SIGINT', function() {
+    pins.forEach(function(pin) { rpio.close(pin); });
+    process.exit(0);
+  });
 };

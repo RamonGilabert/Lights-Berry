@@ -9,22 +9,11 @@ module.exports = function(controllerID, bookshelf) {
 
   socket.on('connect', function() {
     console.log('A light connected to the central server.');
-
-    socket.emit('ios-light', {
-      id: 1,
-      controllerID: 1,
-      status: true,
-      intensity: 1,
-      red: 1,
-      green: 1,
-      blue: 1,
-      token: 'td832d3q6r5o7lc0ajeqg5b8bb0e1q7f'
-    });
   });
 
   socket.on('light-' + controllerID, function(light) {
-    new Light()
-    .fetch({ 'id' : light.id })
+    new Light({ 'id' : light.light.id })
+    .fetch()
     .then(function(bookshelfLight) {
       if (parseInt(bookshelfLight.attributes['controller_id']) === parseInt(controllerID)) {
         bookshelfLight.save({

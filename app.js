@@ -15,9 +15,12 @@ app.set('view engine', 'ejs');
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 
-  control.checkFlow(bookshelf, Light, Controller)
-  .then(function(light) {
-    require('./app/classes/socket.js')(light['controller_id'], bookshelf);
-    require('./app/classes/berry.js').light(light);
-  });
+  require('./app/classes/bluetooth.js')(1, bookshelf);
+
+  // control.checkFlow(bookshelf, Light, Controller)
+  // .then(function(light) {
+  //   require('./app/classes/socket.js')(light['controller_id'], bookshelf);
+  //   require('./app/classes/berry.js').light(light);
+  //   require('./app/classes/bluetooth.js')(light['controller_id'], bookshelf);
+  // });
 });

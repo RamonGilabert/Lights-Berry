@@ -6,6 +6,7 @@
   "main": "app.js",
   "license": "BSD-3-Clause",
   "dependencies": {
+    "bluetooth-serial-port": "^1.2.6",
     "body-parser": "~1.14.2",
     "bookshelf": "0.9.1",
     "express": "~4.13.3",

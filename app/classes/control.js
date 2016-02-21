@@ -1,10 +1,13 @@
 /* Control first time */
 
 var Requester = require('../classes/requester.js');
+var serialPort = require('bluetooth-serial-port');
+var bluetooth = new serialPort.BluetoothSerialPort();
 
 module.exports = {
 
   Requester: Requester,
+  bluetooth: bluetooth,
 
   checkFlow: function(bookshelf, Light, Controller) {
     return new Promise(function(resolve, reject) {
@@ -39,14 +42,21 @@ module.exports = {
       .fetchAll()
       .then(function(lights) {
         if (lights.length === 0) {
-          Requester.postLight(controllerID)
-          .then(function(light) {
-            new Light()
-            .save(light)
-            .then(function(light) {
-              resolve(light.attributes);
-            });
+          bluetooth.on('found', function(address, name) {
+            // TODO: Change for arduino.
+            if (name === 'Ramon\'s iPhone') {
+              Requester.postLight(controllerID, address)
+              .then(function(light) {
+                new Light()
+                .save(light)
+                .then(function(light) {
+                  resolve(light.attributes);
+                });
+              });
+            }
           });
+
+          bluetooth.inquire();
         } else {
           resolve(lights.models[0].attributes);
         }

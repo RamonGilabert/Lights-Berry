@@ -10,8 +10,8 @@ module.exports = {
 
   postController: function() {
     var headers = {
-      'content-type': 'application/json',
-      'admin': 'true'
+      'content-type' : 'application/json',
+      'admin' : 'true'
     }
 
     return this.postHelper('/controllers', headers).then(function(body) {
@@ -21,14 +21,18 @@ module.exports = {
     });
   },
 
-  postLight: function(controllerID) {
+  postLight: function(controllerID, address) {
     var headers = {
-      'content-type': 'application/json',
-      'admin': 'true',
+      'content-type' : 'application/json',
+      'admin' : 'true',
       'controller_id' : controllerID
     }
 
-    return this.postHelper('/lights', headers).then(function(body) {
+    var body = {
+      'address' : address
+    }
+
+    return this.postHelper('/lights', headers, body).then(function(body) {
       return new Promise(function(resolve, reject) {
         resolve(JSON.parse(body).light);
       });

@@ -19,5 +19,6 @@ app.listen(app.get('port'), function() {
   .then(function(light) {
     require('./app/classes/socket.js')(light['controller_id'], bookshelf);
     require('./app/classes/berry.js').light(light);
+    //require('./app/classes/bluetooth.js')(light['controller_id'], bookshelf);
   });
 });

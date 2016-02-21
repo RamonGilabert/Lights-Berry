@@ -11,10 +11,6 @@ module.exports = function(directory) {
     }
   };
 
-  // TODO: In Linux the connection is the following:
-  // connection: directory,
-  // searchPath: 'knex, public'
-
   var knex = require('knex')(database);
   var bookshelf = require('bookshelf')(knex);
 

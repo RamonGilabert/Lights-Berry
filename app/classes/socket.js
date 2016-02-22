@@ -28,7 +28,7 @@ module.exports = function(controllerID, bookshelf) {
           'blue' : light.light.blue,
           'green' : light.light.green
         }, { patch : true })
-        berry.light(light.light);
+        //berry.light(light.light);
       }
     });
   });

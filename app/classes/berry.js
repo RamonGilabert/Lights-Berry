@@ -1,36 +1,41 @@
 /* The berry controller */
 
-var rpio = require('rpio');
-var redPin = 12;
-var greenPin = 32;
-var bluePin = 33;
-var pins = [redPin, greenPin, bluePin];
-var range = 255;
-var clockDivider = 8;
+var serialPort = require('bluetooth-serial-port');
+var bluetooth = new serialPort.BluetoothSerialPort();
 
 module.exports = {
 
   light: function(light) {
-    if (light.status) {
-      pins.forEach(function(pin) {
-        rpio.open(pin, rpio.PWM);
-        rpio.pwmSetClockDivider(clockDivider);
-        rpio.pwmSetRange(pin, range);
+    var address = light.address;
+
+    btSerial.findSerialPortChannel(address, function(channel) {
+      btSerial.connect(address, channel, function() {
+        console.log('Connected via Bluetooth');
+        // TODO: Send the light information.
+        btSerial.write(new Buffer('data', 'utf-8'));
       });
 
-      rpio.pwmSetData(redPin, light.red * light.intensity * 255);
-      rpio.pwmSetData(greenPin, light.green * light.intensity * 255);
-      rpio.pwmSetData(bluePin, light.blue * light.intensity * 255);
-    } else {
-      pins.forEach(function(pin) {
-        rpio.open(pin, rpio.PWM);
-        rpio.close(pin);
+      btSerial.close();
+    });
+  },
+
+  lights: function(controllerID, bookshelf) {
+    new Light()
+    .fetchAll()
+    .then(function(lights) {
+      lights.modules.forEach(function(light) {
+        var address = light.attributes.address;
+
+        btSerial.findSerialPortChannel(address, function(channel) {
+          btSerial.connect(address, channel, function() {
+            console.log('Connected via Bluetooth');
+            // TODO: Send the light information.
+            btSerial.write(new Buffer('data', 'utf-8'));
+          });
+
+          btSerial.close();
+        });
       });
-    }
+    });
   }
 };
-
-process.on('SIGINT', function() {
-  pins.forEach(function(pin) { rpio.close(pin); });
-  process.exit(0);
-});

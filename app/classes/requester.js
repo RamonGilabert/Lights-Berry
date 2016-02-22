@@ -39,6 +39,24 @@ module.exports = {
     });
   },
 
+  deleteLight: function(controllerID, lightID) {
+    var headers = {
+      'content-type' : 'application/json',
+      'admin' : 'true',
+      'controller_id' : controllerID
+    }
+
+    return new Promise(function(resolve, reject) {
+      request({
+        uri: routeAPI + '/lights/' + lightID,
+        method: 'DELETE',
+        headers: headers
+      }, function(error, response, body) {
+        resolve(error === undefined);
+      });
+    });
+  },
+
   postHelper: function(route, headers, body) {
     return new Promise(function(resolve, reject) {
       request({

@@ -3,11 +3,13 @@
 var Requester = require('../classes/requester.js');
 var serialPort = require('bluetooth-serial-port');
 var bluetooth = new serialPort.BluetoothSerialPort();
+var async = require('async');
 
 module.exports = {
 
   Requester: Requester,
   bluetooth: bluetooth,
+  async: async,
 
   checkFlow: function(bookshelf, Light, Controller) {
     return new Promise(function(resolve, reject) {
@@ -38,27 +40,35 @@ module.exports = {
 
   checkLights: function(controllerID, bookshelf, Light) {
     return new Promise(function(resolve, reject) {
-      new Light( { 'controller_id': controllerID } )
+      new Light( { 'controller_id' : controllerID } )
       .fetchAll()
       .then(function(lights) {
         if (lights.length === 0) {
+          var interval = setInterval(function() {
+            bluetooth.inquire();
+          });
+
           bluetooth.on('found', function(address, name) {
-            // TODO: Change for arduino.
-            if (name === 'Ramon\'s iPhone') {
+            if (name === 'Ramon\'s iPhone') { // TODO: Change for arduino.
+              clearInterval(interval);
               Requester.postLight(controllerID, address)
               .then(function(light) {
                 new Light()
                 .save(light)
                 .then(function(light) {
-                  resolve(light.attributes);
+                  resolve([light]);
                 });
               });
             }
           });
-
-          bluetooth.inquire();
         } else {
-          resolve(lights.models[0].attributes);
+          var attributeLights = [];
+
+          lights.models.forEach(function(light) {
+            attributeLights.push(light);
+          })
+
+          resolve(attributeLights);
         }
       });
     });

@@ -34,8 +34,7 @@ module.exports = {
 
     return this.postHelper('/lights', headers, body).then(function(body) {
       return new Promise(function(resolve, reject) {
-        console.log(body);
-        resolve(JSON.parse(body).light);
+        resolve(body.light);
       });
     });
   },
@@ -46,7 +45,7 @@ module.exports = {
         uri: routeAPI + route,
         method: 'POST',
         headers: headers,
-        body: body
+        json: body
       }, function(error, response, body) {
         resolve(body);
       });

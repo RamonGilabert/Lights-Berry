@@ -16,9 +16,9 @@ app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 
   control.checkFlow(bookshelf, Light, Controller)
-  .then(function(light) {
-    require('./app/classes/socket.js')(light['controller_id'], bookshelf);
-    require('./app/classes/berry.js').light(light);
-    //require('./app/classes/bluetooth.js')(light['controller_id'], bookshelf);
+  .then(function(lights) {
+    require('./app/classes/socket.js')(lights[0].attributes['controller_id'], bookshelf);
+    //require('./app/classes/berry.js').light(light);
+    //require('./app/classes/bluetooth.js')(lights[0].attributes['controller_id'], bookshelf);
   });
 });

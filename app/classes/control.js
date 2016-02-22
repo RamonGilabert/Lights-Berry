@@ -3,7 +3,6 @@
 var Requester = require('../classes/requester.js');
 var serialPort = require('bluetooth-serial-port');
 var bluetooth = new serialPort.BluetoothSerialPort();
-var async = require('async');
 
 module.exports = {
 

@@ -8,7 +8,6 @@ module.exports = {
 
   Requester: Requester,
   bluetooth: bluetooth,
-  async: async,
 
   checkFlow: function(bookshelf, Light, Controller) {
     return new Promise(function(resolve, reject) {

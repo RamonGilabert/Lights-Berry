@@ -11,10 +11,6 @@ module.exports = function(controllerID, bookshelf) {
     console.log('A light connected to the central server.');
   });
 
-  socket.on('connect_error', function(error) {
-    console.log(error);
-  });
-
   socket.on('light-' + controllerID, function(light) {
     new Light({ 'id' : light.light.id })
     .fetch()

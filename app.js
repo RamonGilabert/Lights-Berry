@@ -8,6 +8,7 @@ var Controller = require('./app/models/controller.js')(bookshelf);
 var Light = require('./app/models/light.js')(bookshelf);
 
 var control = require('./app/classes/control.js');
+var generalID = 0;
 
 app.set('port', 6000);
 app.set('views', __dirname + '/views');
@@ -18,6 +19,8 @@ app.listen(app.get('port'), function() {
 
   control.checkFlow(bookshelf, Light, Controller)
   .then(function(controllerID) {
+    generalID = controllerID;
+
     require('./app/classes/socket.js')(controllerID, bookshelf);
 
     var bluetooth = new (forever.Monitor)('./app/classes/bluetooth.js', {
@@ -26,6 +29,13 @@ app.listen(app.get('port'), function() {
 
     bluetooth.start();
 
-    //require('./app/classes/berry.js').lights(controllerID, bookshelf);
+    require('./app/classes/berry.js').lights(controllerID, bookshelf);
+  });
+});
+
+process.on('SIGINT', function() {
+  require('./app/classes/berry.js').lightsOff(generalID, bookshelf).then(function() {
+    console.log('\nExiting the hub');
+    process.exit();
   });
 });

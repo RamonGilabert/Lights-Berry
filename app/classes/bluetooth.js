@@ -23,17 +23,27 @@ new Light()
   });
 
   bluetooth.on('found', function(address, name) {
-    if (name === 'Ramon\'s iPhone' && addresses.indexOf(address) < 0) { // TODO: Do the same thing here, change for arduino. That will always be running.
-      addresses.push(address);
-      Requester.postLight(controllerID, address)
-      .then(function(light) {
-        new Light()
-        .save(light)
+    if (name === 'HC-06' && addresses.indexOf(address) < 0) {
+      var exec = require('child_process').exec;
+      function execute(command, callback) {
+        exec(command, function(error, stdout, stderr) { console.log(error); callback(stdout); });
+      };
+
+      execute('/home/pi/Desktop/Lights-Berry/bluetooth.sh ' + address, function(callback) {
+        console.log(callback);
+
+        addresses.push(address);
+        Requester.postLight(controllerID, address)
         .then(function(light) {
-          console.log('A new light was saved!');
+          new Light()
+          .save(light)
+          .then(function(light) {
+            console.log('A new light was saved!');
+            require('./berry.js').light(light.attributes);
+          });
         });
       });
-    } else if (name === 'Ramon\'s iPad') {
+    } else if (name === 'Ramon\'s iPhone') {
       new Controller()
       .fetch({ 'id' : controllerID })
       .then(function(controller) {
@@ -44,14 +54,7 @@ new Light()
           }, { patch : true })
           .then(function(controller) {
             console.log('A new phone connected.');
-            // TODO: Uncomment those lines when in the app.
-            // bluetooth.findSerialPortChannel(address, function(channel) {
-            //   bluetooth.connect(address, channel, function() {
-            //     bluetooth.write(new Buffer('controller.attributes.id', 'utf-8'));
-            //   });
-            //
-            //   bluetooth.close();
-            // });
+            // TODO: Send the controller and the token.
           });
       });
     }

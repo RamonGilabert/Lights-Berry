@@ -48,7 +48,10 @@ app.listen(app.get('port'), function() {
 
 process.on('SIGINT', function() {
   shouldReconnect = false;
-  berry.lightsOff(generalID, bookshelf, bluetooth);
+  berry.lightsOff(generalID, bookshelf, bluetooth).then(function() {
+    bluetooth.close();
+    process.exit(0);
+  });
 });
 
 bluetooth.on('closed', function() {

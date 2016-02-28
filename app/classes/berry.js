@@ -9,13 +9,10 @@ module.exports = {
   bluetooth: bluetooth,
 
   lightsOff: function(controllerID, bookshelf, bluetooth) {
-    var Light = require('../models/light.js')(bookshelf);
-    new Light()
-    .fetchAll()
-    .then(function(lights) {
+    return new Promise(function(resolve, reject) {
       module.exports.bluetooth.write(new Buffer([0, 0, 0]), function(error, bytes) {
         module.exports.bluetooth.close();
-        process.exit();
+        resolve();
       });
     });
   },

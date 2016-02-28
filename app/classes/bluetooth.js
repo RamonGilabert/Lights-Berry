@@ -2,12 +2,12 @@
 
 var controllerID = parseInt(process.argv[2]);
 var databaseAddress = process.argv[3];
+var serialPort = require('bluetooth-serial-port');
+var bluetooth = new serialPort.BluetoothSerialPort();
 var bookshelf = require('../classes/database.js')(databaseAddress);
 var Controller = require('../models/controller.js')(bookshelf);
 var Light = require('../models/light.js')(bookshelf);
 var Requester = require('../classes/requester.js');
-var serialPort = require('bluetooth-serial-port');
-var bluetooth = new serialPort.BluetoothSerialPort();
 
 new Light()
 .fetchAll()
@@ -24,22 +24,25 @@ new Light()
 
   bluetooth.on('found', function(address, name) {
     if (name === 'HC-06' && addresses.indexOf(address) < 0) {
+      console.log('Found a light, attempting to pair.');
+
+      addresses.push(address);
+      
       var exec = require('child_process').exec;
+
       function execute(command, callback) {
-        exec(command, function(error, stdout, stderr) { console.log(error); callback(stdout); });
+        exec(command, function(error, stdout, stderr) { callback(stdout); });
       };
 
       execute('/home/pi/Desktop/Lights-Berry/bluetooth.sh ' + address, function(callback) {
         console.log(callback);
 
-        addresses.push(address);
         Requester.postLight(controllerID, address)
         .then(function(light) {
           new Light()
           .save(light)
           .then(function(light) {
             console.log('A new light was saved!');
-            require('./berry.js').light(light.attributes);
           });
         });
       });

@@ -1,11 +1,11 @@
 /* Socket handler */
 
-module.exports = function(controllerID, bookshelf) {
+module.exports = function(controllerID, bookshelf, berry) {
 
   var io = require('socket.io-client');
   var socket = io.connect('https://lights-backend.herokuapp.com', { reconnect: true });
   var Light = require('../models/light.js')(bookshelf);
-  var berry = require('../classes/berry.js');
+  var controlled = false;
 
   socket.on('connect', function() {
     console.log('A light connected to the central server.');
@@ -28,8 +28,15 @@ module.exports = function(controllerID, bookshelf) {
           'blue' : light.light.blue,
           'green' : light.light.green
         }, { patch : true })
-        //berry.light(light.light);
+        berry.light(light.light);
       }
     });
+  });
+
+  socket.on('new-ios-light-' + controllerID, function(light) {
+    if (!controlled) {
+      berry.connectLight(light.light);
+      controlled = true;
+    }
   });
 };

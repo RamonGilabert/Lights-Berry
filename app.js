@@ -3,17 +3,17 @@ var app = express();
 var databaseAddress = process.env.DATABASE_URL || 'postgres://localhost';
 var bookshelf = require('./app/classes/database.js')(databaseAddress);
 var forever = require('forever-monitor');
+var util = require('util')
+var exec = require('child_process').exec;
 
 var Controller = require('./app/models/controller.js')(bookshelf);
 var Light = require('./app/models/light.js')(bookshelf);
 
 var control = require('./app/classes/control.js');
-var generalID = 0;
-
-var serialPort = require('bluetooth-serial-port');
-var bluetooth = new serialPort.BluetoothSerialPort();
 var berry = require('./app/classes/berry.js');
-var shouldReconnect = true;
+
+berry.databaseAddress = databaseAddress;
+process.stdin.resume();
 
 app.set('port', 6000);
 app.set('views', __dirname + '/views');
@@ -22,48 +22,14 @@ app.set('view engine', 'ejs');
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 
-  berry.bluetooth = bluetooth;
-
   control.checkFlow(bookshelf, Light, Controller)
-  .then(function(controllerID) {
-    generalID = controllerID;
-
-    require('./app/classes/socket.js')(controllerID, bookshelf, berry);
-
-    var foreverBluetooth = new (forever.Monitor)('./app/classes/bluetooth.js', {
-      args: [controllerID, databaseAddress]
-    });
-
-    foreverBluetooth.start();
-
-    new Light()
-    .fetchAll()
-    .then(function(lights) {
-      if (lights.length != 0) {
-        berry.lights(lights);
-      }
-    });
+  .then(function(controller) {
+    require('./app/classes/socket.js')(controller.id, bookshelf, berry);
+    require('./app/classes/bluetooth.js')(controller, bookshelf, berry);
   });
 });
 
 process.on('SIGINT', function() {
-  shouldReconnect = false;
-  berry.lightsOff(generalID, bookshelf, bluetooth).then(function() {
-    bluetooth.close();
-    process.exit(0);
-  });
-});
-
-bluetooth.on('closed', function() {
-  if (shouldReconnect) {
-    console.log('Reconnecting');
-
-    new Light()
-    .fetchAll()
-    .then(function(lights) {
-      if (lights.length != 0) {
-        berry.lights(lights);
-      }
-    });
-  }
+  berry.lightsOff(); // TODO: Implement.
+  process.exit();
 });

@@ -1,48 +1,40 @@
 /* The berry controller */
 
-var Requester = require('../classes/requester.js');
-var bluetooth = {};
-var databaseAddress = "";
+var lights = [];
+var peripherals = [];
+var characteristics = [];
 
-module.exports = {
+light = function(light) {
+  lights.forEach(function(berry) {
+    if (berry === light.id) {
+      var index = lights.indexOf(berry);
+      var characteristic = characteristics[index];
+      var lightOn = 0;
 
-  bluetooth: bluetooth,
+      if (light.status) {
+        lightOn = 1;
+      }
 
-  lightsOff: function(controllerID, bookshelf, bluetooth) {
-    return new Promise(function(resolve, reject) {
-      module.exports.bluetooth.write(new Buffer([0, 0, 0]), function(error, bytes) {
-        module.exports.bluetooth.close();
-        resolve();
-      });
-    });
-  },
-
-  light: function(light) {
-    var lightOn = (light.status === true || String(light.status) === String(true)) ? 1 : 0;
-    module.exports.bluetooth.write(new Buffer([light.red * 255 * lightOn * light.intensity,
-      light.green * 255 * lightOn * light.intensity,
-       light.blue * 255 * lightOn * light.intensity]), function(error, bytes) {
-        if (error) { console.log(error); }
-      });
-  },
-
-  connectLight: function(light) {
-    var interval = setInterval(function() {
-      module.exports.bluetooth.connect(light.address, 1, function() {
-        clearInterval(interval);
-        console.log('Connected via Bluetooth');
-        var lightOn = (light.status === true || String(light.status) === String(true)) ? 1 : 0;
-
-        module.exports.bluetooth.write(new Buffer([light.red * 255 * lightOn * light.intensity,
-          light.green * 255 * lightOn * light.intensity,
-          light.blue * 255 * lightOn * light.intensity]), function(error, bytes) {
-            if (error) { console.log(error); }
-          });
-      });
-    });
-  },
-
-  lights: function(lights) {
-    this.connectLight(lights.models[0].attributes);
-  }
+      characteristic.write(new Buffer([
+        Math.floor(light.red * 255 * lightOn * light.intensity),
+        Math.floor(light.green * 255 * lightOn * light.intensity),
+        Math.floor(light.blue * 255 * lightOn * light.intensity)]), true);
+    }
+  });
 };
+
+lightsOff = function() {
+  characteristics.forEach(function(characteristic) {
+    var index = characteristics.indexOf(characteristic);
+    var peripheral = peripherals[index];
+
+    characteristic.write(new Buffer([0, 0, 0]), true);
+    peripheral.disconnect();
+  });
+}
+
+exports.lights = lights;
+exports.peripherals = peripherals;
+exports.characteristics = characteristics;
+exports.light = light;
+exports.lightsOff = lightsOff;

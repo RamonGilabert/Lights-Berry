@@ -1,65 +1,99 @@
 /* Bluetooth handler */
 
-var controllerID = parseInt(process.argv[2]);
-var databaseAddress = process.argv[3];
-var serialPort = require('bluetooth-serial-port');
-var bluetooth = new serialPort.BluetoothSerialPort();
-var bookshelf = require('../classes/database.js')(databaseAddress);
-var Controller = require('../models/controller.js')(bookshelf);
-var Light = require('../models/light.js')(bookshelf);
-var Requester = require('../classes/requester.js');
+module.exports = function(controller, bookshelf, berry) {
 
-new Light()
-.fetchAll()
-.then(function(bookshelfLights) {
-  var addresses = [];
+  var Light = require('../models/light.js')(bookshelf);
+  var Requester = require('../classes/requester.js');
+  var util = require('util')
+  var exec = require('child_process').exec;
+  var noble = require('noble');
 
-  bookshelfLights.models.forEach(function(light) {
-    addresses.push(light.attributes.address);
+  exec("sudo hciconfig hci0 up");
+
+  noble.on('stateChange', function(state) {
+
+    if (state === "poweredOn") {
+      noble.startScanning([], true);
+      console.log("Starting to look for peripherals.");
+    } else {
+      noble.stopScanning();
+      console.log("Stopped looking for peripherals.");
+    }
   });
 
-  var interval = setInterval(function() {
-    bluetooth.inquire();
-  });
+  noble.on('discover', function(peripheral) {
+    if (peripheral.advertisement.localName === "BLE Shield") {
 
-  bluetooth.on('found', function(address, name) {
-    if (name === 'HC-06' && addresses.indexOf(address) < 0) {
-      console.log('Found a light, attempting to pair.');
+      var address = peripheral.address;
 
-      addresses.push(address);
-      
-      var exec = require('child_process').exec;
+      connect(peripheral, "713d0003503e4c75ba943148f18d941e")
+      .then(function(characteristic) {
+        console.log("Ready to write.");
 
-      function execute(command, callback) {
-        exec(command, function(error, stdout, stderr) { callback(stdout); });
-      };
+        new Light()
+        .fetchAll()
+        .then(function(bookshelfLights) {
 
-      execute('/home/pi/Desktop/Lights-Berry/bluetooth.sh ' + address, function(callback) {
-        console.log(callback);
-
-        Requester.postLight(controllerID, address)
-        .then(function(light) {
-          new Light()
-          .save(light)
-          .then(function(light) {
-            console.log('A new light was saved!');
+          var addresses = [];
+          bookshelfLights.models.forEach(function(light) {
+            addresses.push(light.attributes.address);
           });
+
+          if (addresses.indexOf(address) < 0) {
+            Requester.postLight(controller.id, address)
+            .then(function(light) {
+              new Light()
+              .save(light)
+              .then(function(light) {
+                console.log('A new light was saved!');
+                berry.lights.push(light.id);
+              });
+            });
+          } else {
+            var index = addresses.indexOf(address)
+            berry.lights.push(bookshelfLights.models[index].id);
+          }
+
+          berry.peripherals.push(peripheral);
+          berry.characteristics.push(characteristic);
+
+          setTimeout(function() {
+            noble.startScanning([], true);
+          }, 3000);
         });
       });
-    } else if (name === 'Ramon\'s iPhone') {
-      new Controller()
-      .fetch({ 'id' : controllerID })
-      .then(function(controller) {
-        controller
-          .save({
-            'phone_id' : address,
-            'updated' : new Date()
-          }, { patch : true })
-          .then(function(controller) {
-            console.log('A new phone connected.');
-            // TODO: Send the controller and the token.
-          });
+    } else if (peripheral.advertisement.localName === "Lights") {
+      connect(peripheral, "7DAB97504510410CB030D5597D3EBE6D".toLowerCase())
+      .then(function(characteristic) {
+        console.log("Ready to send information.")
+
+        var buffer = new Buffer(
+          controller.token.toString() + controller.id.toString(), "utf-8");
+
+        characteristic.write(buffer, false);
+
+        setTimeout(function() {
+          noble.startScanning([], true);
+        }, 3000);
       });
     }
   });
-});
+
+  function connect(peripheral, UUID) {
+    return new Promise(function(resolve, reject) {
+      peripheral.connect(function(error) {
+        peripheral.discoverServices([], function(error, services) {
+          services.forEach(function(service) {
+            service.discoverCharacteristics([], function(error, characteristics) {
+              characteristics.forEach(function(characteristic) {
+                if (characteristic.uuid == UUID) {
+                  resolve(characteristic);
+                }
+              });
+            });
+          })
+        });
+      });
+    });
+  }
+}

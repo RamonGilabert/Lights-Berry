@@ -16,6 +16,7 @@ module.exports = function(controllerID, bookshelf, berry) {
   });
 
   socket.on('light-' + controllerID, function(light) {
+    berry.light(light.light);
     new Light({ 'id' : light.light.id })
     .fetch()
     .then(function(bookshelfLight) {
@@ -35,7 +36,6 @@ module.exports = function(controllerID, bookshelf, berry) {
 
   socket.on('new-ios-light-' + controllerID, function(light) {
     if (!controlled) {
-      berry.connectLight(light.light);
       controlled = true;
     }
   });

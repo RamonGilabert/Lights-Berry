@@ -20,11 +20,11 @@ module.exports = {
             new Controller()
             .save(controller)
             .then(function(controller) {
-              resolve(controller.id);
+              resolve(controller);
             });
           });
         } else {
-          resolve(controllers.models[0].id);
+          resolve(controllers.models[0].attributes);
         }
       });
     });

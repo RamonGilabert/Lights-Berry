@@ -9,6 +9,7 @@ var exec = require('child_process').exec;
 var Controller = require('./app/models/controller.js')(bookshelf);
 var Light = require('./app/models/light.js')(bookshelf);
 
+var Requester = require('./app/classes/requester.js');
 var control = require('./app/classes/control.js');
 var berry = require('./app/classes/berry.js');
 
@@ -24,12 +25,40 @@ app.listen(app.get('port'), function() {
 
   control.checkFlow(bookshelf, Light, Controller)
   .then(function(controller) {
-    require('./app/classes/socket.js')(controller.id, bookshelf, berry);
-    require('./app/classes/bluetooth.js')(controller, bookshelf, berry);
+
+    console.log("Updating the database.");
+    Requester.getLights(controller.id)
+    .then(function(lights) {
+      if (lights.length === 0) {
+        require('./app/classes/socket.js')(controller.id, bookshelf, berry);
+        require('./app/classes/bluetooth.js')(controller, bookshelf, berry);
+      } else {
+        lights.forEach(function(light) {
+          new Light({ 'id' : light.id })
+          .fetch()
+          .then(function(bookshelfLight) {
+            bookshelfLight.save({
+              'updated' : new Date(),
+              'status' : light.status,
+              'intensity' : light.intensity,
+              'red' : light.red,
+              'blue' : light.blue,
+              'green' : light.green
+            }, { patch : true })
+            .then(function() {
+              console.log("Done updating the database");
+
+              require('./app/classes/socket.js')(controller.id, bookshelf, berry);
+              require('./app/classes/bluetooth.js')(controller, bookshelf, berry);
+            })
+          });
+        });
+      }
+    });
   });
 });
 
 process.on('SIGINT', function() {
-  berry.lightsOff(); // TODO: Implement.
+  berry.lightsOff();
   process.exit();
 });

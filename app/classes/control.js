@@ -1,13 +1,10 @@
 /* Control first time */
 
 var Requester = require('../classes/requester.js');
-var serialPort = require('bluetooth-serial-port');
-var bluetooth = new serialPort.BluetoothSerialPort();
 
 module.exports = {
 
   Requester: Requester,
-  bluetooth: bluetooth,
 
   checkFlow: function(bookshelf, Light, Controller) {
     return new Promise(function(resolve, reject) {

@@ -2,9 +2,7 @@ var express = require('express');
 var app = express();
 var databaseAddress = process.env.DATABASE_URL || 'postgres://localhost';
 var bookshelf = require('./app/classes/database.js')(databaseAddress);
-var forever = require('forever-monitor');
-var util = require('util')
-var exec = require('child_process').exec;
+var rpio = require('rpio');
 
 var Controller = require('./app/models/controller.js')(bookshelf);
 var Light = require('./app/models/light.js')(bookshelf);
@@ -13,8 +11,9 @@ var Requester = require('./app/classes/requester.js');
 var control = require('./app/classes/control.js');
 var berry = require('./app/classes/berry.js');
 
+rpio.open(11, rpio.OUTPUT, rpio.LOW);
+
 berry.databaseAddress = databaseAddress;
-process.stdin.resume();
 
 app.set('port', 6000);
 app.set('views', __dirname + '/views');
@@ -22,6 +21,8 @@ app.set('view engine', 'ejs');
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
+
+  rpio.write(11, rpio.HIGH);
 
   control.checkFlow(bookshelf, Light, Controller)
   .then(function(controller) {
@@ -58,7 +59,12 @@ app.listen(app.get('port'), function() {
   });
 });
 
-process.on('SIGINT', function() {
-  berry.lightsOff();
-  process.exit();
-});
+
+process.stdin.resume();
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
+
+function shutdown() {
+  rpio.close(11);
+  console.log("Closing Lights.");
+}

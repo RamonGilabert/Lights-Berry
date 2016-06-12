@@ -1,5 +1,3 @@
-/* Request manager */
-
 var request = require('request');
 var routeAPI = 'https://lights-backend.herokuapp.com';
 
@@ -35,6 +33,24 @@ module.exports = {
     return this.postHelper('/lights', headers, body).then(function(body) {
       return new Promise(function(resolve, reject) {
         resolve(body.light);
+      });
+    });
+  },
+
+  getLights: function(controllerID) {
+    var headers = {
+      'content-type' : 'application/json',
+      'controller_id' : controllerID
+    }
+
+    return new Promise(function(resolve, reject) {
+      request({
+        uri: routeAPI + '/lights',
+        method: 'GET',
+        headers: headers,
+        qsStringifyOptions: { arrayFormat : 'brackets' }
+      }, function(error, response, body) {
+        resolve(JSON.parse(body));
       });
     });
   },

@@ -13,17 +13,24 @@ module.exports = function(controller, bookshelf, berry) {
   noble.on('stateChange', function(state) {
 
     if (state === "poweredOn") {
-      noble.startScanning([], true);
+      noble.startScanning();
       console.log("Starting to look for peripherals.");
     } else {
-      noble.stopScanning();
       console.log("Stopped looking for peripherals.");
+
+      berry.lights = [];
+      berry.peripherals = [];
+      berry.characteristics = [];
+
+      noble.stopScanning();
+
+      exec("sudo hciconfig hci0 reset");
     }
   });
 
   noble.on('discover', function(peripheral) {
     if (peripheral.advertisement.localName === "BLE Shield") {
-
+      console.log("Found a light, attempting to connect.");
       var address = peripheral.address;
 
       connect(peripheral, "713d0003503e4c75ba943148f18d941e")
@@ -47,34 +54,47 @@ module.exports = function(controller, bookshelf, berry) {
               .then(function(light) {
                 console.log('A new light was saved!');
                 berry.lights.push(light.id);
+                berry.peripherals.push(peripheral);
+                berry.characteristics.push(characteristic);
+                berry.light(light);
+
+                noble.stopScanning();
+                noble.startScanning();
               });
             });
           } else {
             var index = addresses.indexOf(address)
+
             berry.lights.push(bookshelfLights.models[index].id);
+            berry.peripherals.push(peripheral);
+            berry.characteristics.push(characteristic);
+            berry.light(bookshelfLights.models[index].attributes);
           }
 
-          berry.peripherals.push(peripheral);
-          berry.characteristics.push(characteristic);
+          noble.stopScanning();
+          noble.startScanning();
 
-          setTimeout(function() {
-            noble.startScanning([], true);
-          }, 3000);
+          peripheral.once('disconnect', function() {
+            var index = berry.peripherals.indexOf(peripheral);
+            if (index > -1) {
+              berry.lights.splice(index, 1);
+              berry.peripherals.splice(index, 1);
+              berry.characteristics.splice(index, 1);
+            }
+          });
         });
       });
     } else if (peripheral.advertisement.localName === "Lights") {
       connect(peripheral, "7DAB97504510410CB030D5597D3EBE6D".toLowerCase())
       .then(function(characteristic) {
-        console.log("Ready to send information.")
+        console.log("Ready to send information.");
 
-        var buffer = new Buffer(
-          controller.token.toString() + controller.id.toString(), "utf-8");
+        var buffer = new Buffer(String(controller.token) + " " + String(controller.id), "utf-8");
 
         characteristic.write(buffer, false);
 
-        setTimeout(function() {
-          noble.startScanning([], true);
-        }, 3000);
+        noble.stopScanning();
+        noble.startScanning();
       });
     }
   });
@@ -96,4 +116,8 @@ module.exports = function(controller, bookshelf, berry) {
       });
     });
   }
+
+  exports.controller = controller;
+  exports.bookshelf = bookshelf;
+  exports.berry = berry;
 }

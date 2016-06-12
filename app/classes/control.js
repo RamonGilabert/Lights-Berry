@@ -17,7 +17,7 @@ module.exports = {
             new Controller()
             .save(controller)
             .then(function(controller) {
-              resolve(controller);
+              resolve(controller.attributes);
             });
           });
         } else {

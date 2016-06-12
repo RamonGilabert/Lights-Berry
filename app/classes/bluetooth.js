@@ -89,7 +89,7 @@ module.exports = function(controller, bookshelf, berry) {
       .then(function(characteristic) {
         console.log("Ready to send information.");
 
-        var buffer = new Buffer(String(controller.token) + " " + String(controller.id), "utf-8");
+        var buffer = new Buffer(String(controller["token"]) + " " + String(controller["id"]), "utf-8");
 
         characteristic.write(buffer, false);
 

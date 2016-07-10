@@ -15,7 +15,7 @@ rpio.open(11, rpio.OUTPUT, rpio.LOW);
 
 berry.databaseAddress = databaseAddress;
 
-app.set('port', 6000);
+app.set('port', 7000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 

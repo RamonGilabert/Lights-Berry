@@ -15,7 +15,7 @@ module.exports = function(controller, bookshelf, berry) {
     if (state === "poweredOn") {
       console.log("Starting to look for peripherals.");
       noble.startScanning();
-    } else {
+    } if (state === "poweredOff") {
       console.log("Stopped looking for peripherals.");
 
       berry.lights = [];
@@ -23,7 +23,6 @@ module.exports = function(controller, bookshelf, berry) {
       berry.characteristics = [];
 
       noble.stopScanning();
-
       exec("sudo hciconfig hci0 reset");
     }
   });
@@ -93,15 +92,20 @@ module.exports = function(controller, bookshelf, berry) {
         console.log("Ready to send information.");
 
         var buffer = new Buffer(String(controller["token"]) + " " + String(controller["id"]), "utf-8");
+        characteristic.write(buffer, false, function(error) {
+          console.log('Characteristic written.');
+        });
 
-        characteristic.write(buffer, false);
+        setTimeout(function() {
+          peripheral.disconnect();
+        }, 5000);
+      });
 
+      peripheral.once('disconnect', function() {
+        console.log('A phone disconnected already.');
         noble.stopScanning();
         noble.startScanning();
       });
-
-      noble.stopScanning();
-      noble.startScanning();
     }
   });
 

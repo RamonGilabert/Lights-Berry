@@ -13,8 +13,8 @@ module.exports = function(controller, bookshelf, berry) {
   noble.on('stateChange', function(state) {
 
     if (state === "poweredOn") {
-      noble.startScanning();
       console.log("Starting to look for peripherals.");
+      noble.startScanning();
     } else {
       console.log("Stopped looking for peripherals.");
 
@@ -81,6 +81,9 @@ module.exports = function(controller, bookshelf, berry) {
               berry.peripherals.splice(index, 1);
               berry.characteristics.splice(index, 1);
             }
+
+            noble.stopScanning();
+            noble.startScanning();
           });
         });
       });
@@ -96,6 +99,9 @@ module.exports = function(controller, bookshelf, berry) {
         noble.stopScanning();
         noble.startScanning();
       });
+
+      noble.stopScanning();
+      noble.startScanning();
     }
   });
 
